@@ -1,0 +1,24 @@
+apiVersion: konflux-ci.dev/v1alpha1
+kind: Component
+metadata:
+  name: backend-service
+  namespace: new-model-demo
+  labels:
+    app.kubernetes.io/name: backend-service
+    app.kubernetes.io/part-of: sample-app-group
+    app.kubernetes.io/managed-by: integration-service
+spec:
+  containerImage: quay.io/demo-org/backend-service
+  source:
+    url: https://github.com/demo-org/backend-service
+    versions:
+      - name: main
+        revision: main
+        context: ./
+status:
+  pac-repository: demo-org/backend-service
+  versions:
+    - name: main
+      revision: main
+      onboarding-status: succeeded
+      onboarding-time: "2025-08-13T10:10:16 UTC"

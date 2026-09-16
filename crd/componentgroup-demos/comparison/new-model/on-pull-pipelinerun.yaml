@@ -1,0 +1,83 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  name: frontend-service-build-completed
+  namespace: comparison-demo
+  labels:
+    # Required: Mark this as a build PipelineRun
+    pipelines.appstudio.openshift.io/type: build
+    # Standard Tekton labels
+    pipelines.openshift.io/used-by: build-cloud
+    pipelines.openshift.io/runtime: nodejs
+    pipelines.openshift.io/strategy: s2i
+    # Component reference - used by integration service to match to ComponentGroup
+    pipelines.appstudio.openshift.io/component: frontend-service
+    # Git branch information
+    build.appstudio.redhat.com/target_branch: main
+    # Event type (optional, for git provider integration)
+    pipelinesascode.tekton.dev/event-type: pull_request
+    pipelinesascode.tekton.dev/pull-request: "1"
+    # On-pull: triggered by pull request events
+  annotations:
+    # Mark as chains signed - required for BuildPipelineRunSignedAndSucceededPredicate
+    chains.tekton.dev/signed: "true"
+    # Build repository information
+    build.appstudio.openshift.io/repo: "https://github.com/demo-org/frontend-service?rev=6a7c81802e785aa869f82301afe61f4e9775772b"
+    # Target branch configuration
+    pipelinesascode.tekton.dev/on-target-branch: "[main,master]"
+    pipelinesascode.tekton.dev/source-branch: main
+    # Git provider information
+    pipelinesascode.tekton.dev/url-org: demo-org
+    pipelinesascode.tekton.dev/url-repository: frontend-service
+    pipelinesascode.tekton.dev/git-provider: github
+    # Component version - matches ComponentGroup ComponentVersionReference
+    appstudio.redhat.com/component-version: "main"
+spec:
+  pipelineRef:
+    name: docker-build
+    resolver: bundle
+    params:
+      - name: bundle
+        value: quay.io/konflux-ci/buildah-task:latest@sha256:abc123
+      - name: name
+        value: buildah
+  params:
+    - name: output-image
+      value: quay.io/demo-org/frontend-service
+    - name: dockerfile
+      value: ./Dockerfile
+status:
+  # Must be marked as succeeded for the integration service to create a snapshot
+  pipelineSpec:
+    finally: []
+    params: []
+    tasks: []
+  conditions:
+    - lastTransitionTime: "2025-08-13T12:00:00Z"
+      message: All Tasks have completed executing
+      reason: Completed
+      status: "True"
+      type: Succeeded
+  startTime: "2025-08-13T11:55:00Z"
+  completionTime: "2025-08-13T12:00:00Z"
+  # Results from the build - used to populate Snapshot component images
+  results:
+    # IMAGE_DIGEST: The digest of the built container image
+    # This is matched with IMAGE_URL to create the full image reference
+    - name: IMAGE_DIGEST
+      value: sha256:3d5e7f2a4b6c8e1f3a5c7d9e1b4d6f8a2c5e7f9a1c3d5e7f9b2c4e6f8a0c2
+    # IMAGE_URL: The base image URL (without digest)
+    # Combined with IMAGE_DIGEST to form full image reference
+    - name: IMAGE_URL
+      value: quay.io/demo-org/frontend-service
+    # Git information from Tekton Chains
+    # Used to track which commit produced this image
+    - name: CHAINS-GIT_URL
+      value: https://github.com/demo-org/frontend-service
+    - name: CHAINS-GIT_COMMIT
+      value: 6a7c81802e785aa869f82301afe61f4e9775772b
+    # Optional: Additional build metadata
+    - name: CHAINS-GIT_BRANCH
+      value: main
+  # Container image URL for build output tracking
+  childReferences: []

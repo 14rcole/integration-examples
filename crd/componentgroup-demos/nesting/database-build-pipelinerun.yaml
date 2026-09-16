@@ -1,0 +1,62 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  name: database-service-build-completed
+  namespace: nesting-demo
+  labels:
+    pipelines.appstudio.openshift.io/type: build
+    pipelines.openshift.io/used-by: build-cloud
+    pipelines.openshift.io/runtime: postgresql
+    pipelines.openshift.io/strategy: dockerfile
+    pipelines.appstudio.openshift.io/component: database-service
+    build.appstudio.redhat.com/target_branch: main
+    pipelinesascode.tekton.dev/event-type: pull_request
+    pipelinesascode.tekton.dev/pull-request: "1"
+  annotations:
+    chains.tekton.dev/signed: "true"
+    build.appstudio.openshift.io/repo: "https://github.com/demo-org/database-service?rev=7b8d92903f896bb97ae82401bfe62f5f0886883cc"
+    pipelinesascode.tekton.dev/on-target-branch: "[main,master]"
+    pipelinesascode.tekton.dev/source-branch: main
+    pipelinesascode.tekton.dev/url-org: demo-org
+    pipelinesascode.tekton.dev/url-repository: database-service
+    pipelinesascode.tekton.dev/git-provider: github
+    appstudio.redhat.com/component-version: "main"
+spec:
+  pipelineRef:
+    name: docker-build
+    resolver: bundle
+    params:
+      - name: bundle
+        value: quay.io/konflux-ci/buildah-task:latest@sha256:abc123
+      - name: name
+        value: buildah
+  params:
+    - name: output-image
+      value: quay.io/demo-org/database-service
+    - name: dockerfile
+      value: ./Dockerfile
+status:
+  pipelineSpec:
+    finally: []
+    params: []
+    tasks: []
+  conditions:
+    - lastTransitionTime: "2025-08-13T11:00:00Z"
+      message: All Tasks have completed executing
+      reason: Completed
+      status: "True"
+      type: Succeeded
+  startTime: "2025-08-13T10:55:00Z"
+  completionTime: "2025-08-13T11:00:00Z"
+  results:
+    - name: IMAGE_DIGEST
+      value: sha256:2c3ae4f7g6d9h1i2j3k4l5m6n7o8p9q0r1s2t3u4v5w6x7y8z9a0b1c2d3e4f
+    - name: IMAGE_URL
+      value: quay.io/demo-org/database-service
+    - name: CHAINS-GIT_URL
+      value: https://github.com/demo-org/database-service
+    - name: CHAINS-GIT_COMMIT
+      value: 7b8d92903f896bb97ae82401bfe62f5f0886883cc
+    - name: CHAINS-GIT_BRANCH
+      value: main
+  childReferences: []

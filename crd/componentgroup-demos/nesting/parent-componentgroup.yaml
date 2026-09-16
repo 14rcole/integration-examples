@@ -1,0 +1,43 @@
+apiVersion: konflux-ci.dev/v1beta2
+kind: ComponentGroup
+metadata:
+  name: full-app-group
+  namespace: nesting-demo
+  labels:
+    app.kubernetes.io/name: full-app-group
+    app.kubernetes.io/instance: full-app-group
+    app.kubernetes.io/part-of: integration-service
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  # Parent ComponentGroup references nested ComponentGroup and direct component
+  components:
+    - name: data-layer-group
+      kind: componentGroup
+    - name: api-service
+      kind: component
+      componentVersion:
+        name: "main"
+status:
+  # Global Candidate List aggregates from both the nested group and direct components
+  globalCandidateList:
+    # Inherited from nested ComponentGroup (data-layer-group)
+    - name: database-service
+      version: main
+      url: https://github.com/demo-org/database-service
+      lastPromotedImage: quay.io/demo-org/database-service@sha256:2c3ae4f7g6d9h1i2j3k4l5m6n7o8p9q0r1s2t3u4v5w6x7y8z9a0b1c2d3e4f
+      lastPromotedCommit: 7b8d92903f896bb97ae82401bfe62f5f0886883cc
+      lastPromotedBuildTime: "2025-08-13T11:00:00Z"
+    # Direct component
+    - name: api-service
+      version: main
+      url: https://github.com/demo-org/api-service
+      lastPromotedImage: quay.io/demo-org/api-service@sha256:3d4bf5g8h0i2j4k5l6m7n8o9p0q1r2s3t4u5v6w7x8y9z0a1b2c3d4e5f6g7h
+      lastPromotedCommit: 8c9e03a14g907cc08bf93502cgf73g6g1997994dd
+      lastPromotedBuildTime: "2025-08-13T11:30:00Z"
+  conditions:
+    - type: Created
+      status: "True"
+      observedGeneration: 1
+      lastTransitionTime: "2025-08-13T10:20:00Z"
+      reason: ComponentGroupCreated
+      message: Parent ComponentGroup with nested group created successfully

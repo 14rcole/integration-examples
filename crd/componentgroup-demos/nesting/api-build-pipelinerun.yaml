@@ -1,0 +1,62 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  name: api-service-build-completed
+  namespace: nesting-demo
+  labels:
+    pipelines.appstudio.openshift.io/type: build
+    pipelines.openshift.io/used-by: build-cloud
+    pipelines.openshift.io/runtime: python
+    pipelines.openshift.io/strategy: s2i
+    pipelines.appstudio.openshift.io/component: api-service
+    build.appstudio.redhat.com/target_branch: main
+    pipelinesascode.tekton.dev/event-type: pull_request
+    pipelinesascode.tekton.dev/pull-request: "1"
+  annotations:
+    chains.tekton.dev/signed: "true"
+    build.appstudio.openshift.io/repo: "https://github.com/demo-org/api-service?rev=8c9e03a14g907cc08bf93502cgf73g6g1997994dd"
+    pipelinesascode.tekton.dev/on-target-branch: "[main,master]"
+    pipelinesascode.tekton.dev/source-branch: main
+    pipelinesascode.tekton.dev/url-org: demo-org
+    pipelinesascode.tekton.dev/url-repository: api-service
+    pipelinesascode.tekton.dev/git-provider: github
+    appstudio.redhat.com/component-version: "main"
+spec:
+  pipelineRef:
+    name: docker-build
+    resolver: bundle
+    params:
+      - name: bundle
+        value: quay.io/konflux-ci/buildah-task:latest@sha256:abc123
+      - name: name
+        value: buildah
+  params:
+    - name: output-image
+      value: quay.io/demo-org/api-service
+    - name: dockerfile
+      value: ./Dockerfile
+status:
+  pipelineSpec:
+    finally: []
+    params: []
+    tasks: []
+  conditions:
+    - lastTransitionTime: "2025-08-13T11:30:00Z"
+      message: All Tasks have completed executing
+      reason: Completed
+      status: "True"
+      type: Succeeded
+  startTime: "2025-08-13T11:25:00Z"
+  completionTime: "2025-08-13T11:30:00Z"
+  results:
+    - name: IMAGE_DIGEST
+      value: sha256:3d4bf5g8h0i2j4k5l6m7n8o9p0q1r2s3t4u5v6w7x8y9z0a1b2c3d4e5f6g7h
+    - name: IMAGE_URL
+      value: quay.io/demo-org/api-service
+    - name: CHAINS-GIT_URL
+      value: https://github.com/demo-org/api-service
+    - name: CHAINS-GIT_COMMIT
+      value: 8c9e03a14g907cc08bf93502cgf73g6g1997994dd
+    - name: CHAINS-GIT_BRANCH
+      value: main
+  childReferences: []
