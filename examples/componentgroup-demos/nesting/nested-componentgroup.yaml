@@ -1,0 +1,21 @@
+apiVersion: appstudio.redhat.com/v1beta2
+kind: ComponentGroup
+metadata:
+  name: backend-group
+  namespace: nesting-demo
+  labels:
+    app.kubernetes.io/name: data-layer-group
+    app.kubernetes.io/instance: data-layer-group
+    app.kubernetes.io/part-of: integration-service
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  # Nested ComponentGroup contains a single component
+  components:
+    - name: database-service
+      kind: component
+      componentVersion:
+        name: "main"
+    - name: backend-service
+      kind: component
+      componentVersion:
+        name: "main"

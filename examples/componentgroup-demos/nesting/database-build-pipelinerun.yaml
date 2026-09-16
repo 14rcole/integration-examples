@@ -1,0 +1,86 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  name: database-service-build-completed
+  namespace: nesting-demo
+  labels:
+    pipelines.appstudio.openshift.io/type: build
+    pipelines.openshift.io/used-by: build-cloud
+    pipelines.openshift.io/runtime: postgresql
+    pipelines.openshift.io/strategy: dockerfile
+    appstudio.openshift.io/component: database-service
+    build.appstudio.redhat.com/target_branch: main
+    pipelinesascode.tekton.dev/event-type: pull_request
+    pipelinesascode.tekton.dev/pull-request: "1"
+  annotations:
+    chains.tekton.dev/signed: "true"
+    build.appstudio.openshift.io/repo: "https://github.com/demo-org/database-service?rev=7b8d92903f896bb97ae82401bfe62f5f0886883cc"
+    build.konflux-ci.dev/version: "main"
+    pipelinesascode.tekton.dev/on-target-branch: "[main,master]"
+    pipelinesascode.tekton.dev/source-branch: main
+    pipelinesascode.tekton.dev/url-org: demo-org
+    pipelinesascode.tekton.dev/url-repository: database-service
+    pipelinesascode.tekton.dev/git-provider: github
+    appstudio.redhat.com/component-version: "main"
+spec:
+  pipelineSpec:
+    params:
+      - name: output-image
+        type: string
+        description: "The container image URL to build"
+      - name: dockerfile
+        type: string
+        description: "Path to the Dockerfile"
+      - name: git-url
+        type: string
+        description: "The git repository URL"
+      - name: git-commit
+        type: string
+        description: "The git commit hash"
+      - name: git-branch
+        type: string
+        description: "The git branch name"
+    results:
+      - name: IMAGE_DIGEST
+        value: "$(tasks.emit-results.results.IMAGE_DIGEST)"
+      - name: IMAGE_URL
+        value: "$(tasks.emit-results.results.IMAGE_URL)"
+      - name: CHAINS-GIT_URL
+        value: "$(tasks.emit-results.results.CHAINS-GIT_URL)"
+      - name: CHAINS-GIT_COMMIT
+        value: "$(tasks.emit-results.results.CHAINS-GIT_COMMIT)"
+      - name: CHAINS-GIT_BRANCH
+        value: "$(tasks.emit-results.results.CHAINS-GIT_BRANCH)"
+    tasks:
+      - name: emit-results
+        taskRef:
+          resolver: git
+          params:
+            - name: url
+              value: https://github.com/14rcole/integration-examples
+            - name: revision
+              value: componentgroup-demos
+            - name: pathInRepo
+              value: examples/componentgroup-demos/comparison/new-model/emit-results-task.yaml
+        params:
+          - name: image-digest
+            value: sha256:a193d5e7f2a4b6c8e1f3a5c7d9e1b4d6f8a2c5e7f9a1c3d5e7f9b2c4e6f8a0c2
+          - name: image-url
+            value: quay.io/demo-org/database-service
+          - name: git-url
+            value: https://github.com/demo-org/database-service
+          - name: git-commit
+            value: 7b8d92903f896bb97ae82401bfe62f5f0886883cc
+          - name: git-branch
+            value: main
+  params:
+    - name: output-image
+      value: quay.io/demo-org/database-service
+    - name: dockerfile
+      value: ./Dockerfile
+    - name: git-url
+      value: https://github.com/demo-org/database-service
+    - name: git-commit
+      value: 7b8d92903f896bb97ae82401bfe62f5f0886883cc
+    - name: git-branch
+      value: main

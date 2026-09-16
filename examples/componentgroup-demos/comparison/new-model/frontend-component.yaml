@@ -1,0 +1,24 @@
+apiVersion: konflux-ci.dev/v1alpha1
+kind: Component
+metadata:
+  name: frontend-service
+  namespace: comparison-demo
+  labels:
+    app.kubernetes.io/name: frontend-service
+    app.kubernetes.io/part-of: sample-app-group
+    app.kubernetes.io/managed-by: integration-service
+spec:
+  containerImage: quay.io/demo-org/frontend-service
+  source:
+    url: https://github.com/demo-org/frontend-service
+    versions:
+      - name: main
+        revision: main
+        context: ./
+status:
+  pac-repository: demo-org/frontend-service
+  versions:
+    - name: main
+      revision: main
+      onboarding-status: succeeded
+      onboarding-time: "2025-08-13T10:05:16 UTC"

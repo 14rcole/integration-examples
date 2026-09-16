@@ -1,0 +1,19 @@
+apiVersion: appstudio.redhat.com/v1beta2
+kind: ComponentGroup
+metadata:
+  name: full-app-group
+  namespace: nesting-demo
+  labels:
+    app.kubernetes.io/name: full-app-group
+    app.kubernetes.io/instance: full-app-group
+    app.kubernetes.io/part-of: integration-service
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  # Parent ComponentGroup references nested ComponentGroup and direct component
+  components:
+    - name: frontend-service
+      kind: component
+      componentVersion:
+        name: "main"
+    - name: data-layer-group
+      kind: componentGroup

@@ -1,0 +1,64 @@
+---
+# Task definition for test execution that fails
+# This task simulates a failed test by waiting 10 seconds then reporting failure
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: run-test-task-fail
+  namespace: new-model-demo
+spec:
+  description: Simple test task that waits 10 seconds before failing
+  results:
+    - name: TEST_OUTPUT
+      description: Test result output
+      type: string
+  steps:
+    - name: run-test
+      image: alpine:latest
+      script: |
+        #!/bin/sh
+        echo "Starting test..."
+        sleep 10
+        echo "Test failed"
+
+        # Output test results showing failure
+        cat > /tmp/test-output.json <<EOF
+        {
+          "result": "FAILURE",
+          "timestamp": "$(date -u +'%Y-%m-%dT%H:%M:%SZ')",
+          "failures": 1,
+          "successes": 0,
+          "warnings": 0
+        }
+        EOF
+        cat /tmp/test-output.json
+    - name: capture-result
+      image: alpine:latest
+      script: |
+        #!/bin/sh
+        cat /tmp/test-output.json | tee $(results.TEST_OUTPUT.path)
+    - name: fail-test
+      image: alpine:latest
+      script: |
+        #!/bin/sh
+        echo "Test task failed intentionally"
+        exit 1
+---
+# Pipeline definition for failing tests
+# This pipeline orchestrates test execution that results in failure
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: integration-test-pipeline-fail
+  namespace: new-model-demo
+spec:
+  description: Integration test pipeline with 10-second test execution that fails
+  results:
+    - name: TEST_OUTPUT
+      description: Test result output
+      value: $(tasks.test-execution.results.TEST_OUTPUT)
+  tasks:
+    - name: test-execution
+      description: Execute the integration test (will fail)
+      taskRef:
+        name: run-test-task-fail

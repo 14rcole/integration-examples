@@ -1,0 +1,126 @@
+---
+# Independent test - not in testGraph, no parents or children
+apiVersion: appstudio.redhat.com/v1beta2
+kind: IntegrationTestScenario
+metadata:
+  name: independent-test
+  namespace: new-model-demo
+  labels:
+    test.appstudio.openshift.io/optional: "false"
+spec:
+  application: sample-app-group
+  description: "Independent test with no parents or children. Runs in parallel with other root tests."
+  resolverRef:
+    resolver: git
+    params:
+      - name: url
+        value: https://github.com/redhat-appstudio/integration-examples.git
+      - name: revision
+        value: componentgroup-demos
+      - name: pathInRepo
+        value: crd/componentgroup-demos/test-graph/test-pipeline-pass.yaml
+---
+# Root test that fails
+apiVersion: appstudio.redhat.com/v1beta2
+kind: IntegrationTestScenario
+metadata:
+  name: failing-test
+  namespace: new-model-demo
+  labels:
+    test.appstudio.openshift.io/optional: "false"
+spec:
+  application: sample-app-group
+  description: "Root test that fails. Has two children: child-test-1 (failFast: true) and child-test-2 (failFast: false)."
+  resolverRef:
+    resolver: git
+    params:
+      - name: url
+        value: https://github.com/redhat-appstudio/integration-examples.git
+      - name: revision
+        value: componentgroup-demos
+      - name: pathInRepo
+        value: crd/componentgroup-demos/test-graph/test-pipeline-fail.yaml
+---
+# Root test that passes
+apiVersion: appstudio.redhat.com/v1beta2
+kind: IntegrationTestScenario
+metadata:
+  name: passing-test
+  namespace: new-model-demo
+  labels:
+    test.appstudio.openshift.io/optional: "false"
+spec:
+  application: sample-app-group
+  description: "Root test that passes. Has two children: child-test-1 (failFast: true) and child-test-3 (failFast: true)."
+  resolverRef:
+    resolver: git
+    params:
+      - name: url
+        value: https://github.com/redhat-appstudio/integration-examples.git
+      - name: revision
+        value: componentgroup-demos
+      - name: pathInRepo
+        value: crd/componentgroup-demos/test-graph/test-pipeline-pass.yaml
+---
+# Child of failing-test (failFast: true) and passing-test
+apiVersion: appstudio.redhat.com/v1beta2
+kind: IntegrationTestScenario
+metadata:
+  name: child-test-1
+  namespace: new-model-demo
+  labels:
+    test.appstudio.openshift.io/optional: "false"
+spec:
+  application: sample-app-group
+  description: "Child test depending on failing-test (failFast: true) and passing-test. Will be cancelled if failing-test fails due to failFast: true."
+  resolverRef:
+    resolver: git
+    params:
+      - name: url
+        value: https://github.com/redhat-appstudio/integration-examples.git
+      - name: revision
+        value: componentgroup-demos
+      - name: pathInRepo
+        value: crd/componentgroup-demos/test-graph/test-pipeline-pass.yaml
+---
+# Child of failing-test (failFast: false)
+apiVersion: appstudio.redhat.com/v1beta2
+kind: IntegrationTestScenario
+metadata:
+  name: child-test-2
+  namespace: new-model-demo
+  labels:
+    test.appstudio.openshift.io/optional: "false"
+spec:
+  application: sample-app-group
+  description: "Child test depending on failing-test with failFast: false. Will run even if failing-test fails."
+  resolverRef:
+    resolver: git
+    params:
+      - name: url
+        value: https://github.com/redhat-appstudio/integration-examples.git
+      - name: revision
+        value: componentgroup-demos
+      - name: pathInRepo
+        value: crd/componentgroup-demos/test-graph/test-pipeline-pass.yaml
+---
+# Child of passing-test (failFast: true)
+apiVersion: appstudio.redhat.com/v1beta2
+kind: IntegrationTestScenario
+metadata:
+  name: child-test-3
+  namespace: new-model-demo
+  labels:
+    test.appstudio.openshift.io/optional: "false"
+spec:
+  application: sample-app-group
+  description: "Child test depending on passing-test with failFast: true. Will run since passing-test succeeds."
+  resolverRef:
+    resolver: git
+    params:
+      - name: url
+        value: https://github.com/redhat-appstudio/integration-examples.git
+      - name: revision
+        value: componentgroup-demos
+      - name: pathInRepo
+        value: crd/componentgroup-demos/test-graph/test-pipeline-pass.yaml

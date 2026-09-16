@@ -1,0 +1,42 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: emit-results
+spec:
+  params:
+    - name: image-digest
+      type: string
+      description: "The container image digest"
+    - name: image-url
+      type: string
+      description: "The container image URL"
+    - name: git-url
+      type: string
+      description: "The git repository URL"
+    - name: git-commit
+      type: string
+      description: "The git commit hash"
+    - name: git-branch
+      type: string
+      description: "The git branch name"
+  results:
+    - name: IMAGE_DIGEST
+      description: "The container image digest"
+    - name: IMAGE_URL
+      description: "The container image URL"
+    - name: CHAINS-GIT_URL
+      description: "The git repository URL"
+    - name: CHAINS-GIT_COMMIT
+      description: "The git commit hash"
+    - name: CHAINS-GIT_BRANCH
+      description: "The git branch name"
+  steps:
+    - name: emit-results
+      image: busybox
+      script: |
+        #!/bin/sh
+        printf "%s" "$(params.image-digest)" > $(results.IMAGE_DIGEST.path)
+        printf "%s" "$(params.image-url)" > $(results.IMAGE_URL.path)
+        printf "%s" "$(params.git-url)" > $(results.CHAINS-GIT_URL.path)
+        printf "%s" "$(params.git-commit)" > $(results.CHAINS-GIT_COMMIT.path)
+        printf "%s" "$(params.git-branch)" > $(results.CHAINS-GIT_BRANCH.path)

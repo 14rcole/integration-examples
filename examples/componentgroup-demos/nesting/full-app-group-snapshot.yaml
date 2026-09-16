@@ -1,0 +1,20 @@
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Snapshot
+metadata:
+  name: full-app-group-snapshot
+  namespace: nesting-demo
+  labels:
+    app.kubernetes.io/name: full-app-group-snapshot
+    appstudio.openshift.io/component-group: full-app-group
+    test.appstudio.openshift.io/type: override
+spec:
+  componentGroup: full-app-group
+  components:
+    - name: frontend-service
+      version: main
+      containerImage: quay.io/demo-org/frontend-service@sha256:1b29e3d6f5c2a8b4e9d7f1c3a5b8e2d4f6a9c1e3f5a7b9d1e3f5a7b9d1e3f
+      lastPromotedBuildTime: "2025-08-13T12:00:00Z"
+      source:
+        git:
+          url: https://github.com/demo-org/frontend-service
+          revision: 6a7c81802e785aa869f82301afe61f4e9775772b
