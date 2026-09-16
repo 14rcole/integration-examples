@@ -1,0 +1,33 @@
+apiVersion: konflux-ci.dev/v1beta2
+kind: ComponentGroup
+metadata:
+  name: data-layer-group
+  namespace: nesting-demo
+  labels:
+    app.kubernetes.io/name: data-layer-group
+    app.kubernetes.io/instance: data-layer-group
+    app.kubernetes.io/part-of: integration-service
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  # Nested ComponentGroup contains a single component
+  components:
+    - name: database-service
+      kind: component
+      componentVersion:
+        name: "main"
+status:
+  # Global Candidate List for this nested group
+  globalCandidateList:
+    - name: database-service
+      version: main
+      url: https://github.com/demo-org/database-service
+      lastPromotedImage: quay.io/demo-org/database-service@sha256:2c3ae4f7g6d9h1i2j3k4l5m6n7o8p9q0r1s2t3u4v5w6x7y8z9a0b1c2d3e4f
+      lastPromotedCommit: 7b8d92903f896bb97ae82401bfe62f5f0886883cc
+      lastPromotedBuildTime: "2025-08-13T11:00:00Z"
+  conditions:
+    - type: Created
+      status: "True"
+      observedGeneration: 1
+      lastTransitionTime: "2025-08-13T10:15:00Z"
+      reason: ComponentGroupCreated
+      message: Nested ComponentGroup created successfully

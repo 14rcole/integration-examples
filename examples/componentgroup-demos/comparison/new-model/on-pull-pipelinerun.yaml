@@ -1,0 +1,96 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  name: frontend-service-build-completed
+  namespace: comparison-demo
+  labels:
+    # Required: Mark this as a build PipelineRun
+    pipelines.appstudio.openshift.io/type: build
+    # Standard Tekton labels
+    pipelines.openshift.io/used-by: build-cloud
+    pipelines.openshift.io/runtime: nodejs
+    pipelines.openshift.io/strategy: s2i
+    # Component reference - used by integration service to match to ComponentGroup
+    appstudio.openshift.io/component: frontend-service
+    # Git branch information
+    build.appstudio.redhat.com/target_branch: main
+    # Event type (optional, for git provider integration)
+    pipelinesascode.tekton.dev/event-type: pull_request
+    pipelinesascode.tekton.dev/pull-request: "1"
+    # On-pull: triggered by pull request events
+  annotations:
+    # Mark as chains signed - required for BuildPipelineRunSignedAndSucceededPredicate
+    chains.tekton.dev/signed: "true"
+    # Build repository information
+    build.appstudio.openshift.io/repo: "https://github.com/demo-org/frontend-service?rev=6a7c81802e785aa869f82301afe61f4e9775772b"
+    # Target branch configuration
+    pipelinesascode.tekton.dev/on-target-branch: "[main,master]"
+    pipelinesascode.tekton.dev/source-branch: main
+    # Git provider information
+    pipelinesascode.tekton.dev/url-org: demo-org
+    pipelinesascode.tekton.dev/url-repository: frontend-service
+    pipelinesascode.tekton.dev/git-provider: github
+    # Component version - matches ComponentGroup ComponentVersionReference
+    build.konflux-ci.dev/version: "main"
+spec:
+  pipelineSpec:
+    params:
+      - name: output-image
+        type: string
+        description: "The container image URL to build"
+      - name: dockerfile
+        type: string
+        description: "Path to the Dockerfile"
+      - name: git-url
+        type: string
+        description: "The git repository URL"
+      - name: git-commit
+        type: string
+        description: "The git commit hash"
+      - name: git-branch
+        type: string
+        description: "The git branch name"
+    results:
+      - name: IMAGE_DIGEST
+        value: "$(tasks.emit-results.results.IMAGE_DIGEST)"
+      - name: IMAGE_URL
+        value: "$(tasks.emit-results.results.IMAGE_URL)"
+      - name: CHAINS-GIT_URL
+        value: "$(tasks.emit-results.results.CHAINS-GIT_URL)"
+      - name: CHAINS-GIT_COMMIT
+        value: "$(tasks.emit-results.results.CHAINS-GIT_COMMIT)"
+      - name: CHAINS-GIT_BRANCH
+        value: "$(tasks.emit-results.results.CHAINS-GIT_BRANCH)"
+    tasks:
+      - name: emit-results
+        taskRef:
+          resolver: git
+          params:
+            - name: url
+              value: https://github.com/14rcole/integration-examples
+            - name: revision
+              value: componentgroup-demos
+            - name: pathInRepo
+              value: examples/componentgroup-demos/comparison/new-model/emit-results-task.yaml
+        params:
+          - name: image-digest
+            value: sha256:a13d5e7f2a4b6c8e1f3a5c7d9e1b4d6f8a2c5e7f9a1c3d5e7f9b2c4e6f8a0c2
+          - name: image-url
+            value: quay.io/demo-org/frontend-service
+          - name: git-url
+            value: https://github.com/demo-org/frontend-service
+          - name: git-commit
+            value: 6a7c81802e785aa869f82301afe61f4e9775772b
+          - name: git-branch
+            value: main
+  params:
+    - name: output-image
+      value: quay.io/demo-org/frontend-service
+    - name: dockerfile
+      value: ./Dockerfile
+    - name: git-url
+      value: https://github.com/demo-org/frontend-service
+    - name: git-commit
+      value: 6a7c81802e785aa869f82301afe61f4e9775772b
+    - name: git-branch
+      value: main

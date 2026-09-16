@@ -1,0 +1,27 @@
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Snapshot
+metadata:
+  name: frontend-only-snapshot
+  namespace: comparison-demo
+  labels:
+    app.kubernetes.io/name: frontend-only-group-snapshot
+    app.kubernetes.io/instance: frontend-only-group
+    app.kubernetes.io/part-of: integration-service
+    appstudio.openshift.io/component-group: frontend-only-group
+    test.appstudio.openshift.io/type: override
+spec:
+  componentGroup: frontend-only-group
+  source:
+    git:
+      url: https://github.com/demo-org/frontend-service
+      revision: 6a7c81802e785aa869f82301afe61f4e9775772b
+  components:
+    - name: frontend-service
+      source:
+        url: https://github.com/user/repo.git
+        versions:
+          - name: v1.0
+            revision: main
+      containerImage: quay.io/demo-org/frontend-service@sha256:1b29e3d6f5c2a8b4e9d7f1c3a5b8e2d4f6a9c1e3f5a7b9d1e3f5a7b9d1e3f
+      sourceCommit: 6a7c81802e785aa869f82301afe61f4e9775772b
+      lastPromotedBuildTime: "2025-08-13T12:00:00Z"

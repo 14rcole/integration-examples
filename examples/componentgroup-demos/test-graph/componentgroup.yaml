@@ -1,0 +1,66 @@
+apiVersion: konflux-ci.dev/v1beta2
+kind: ComponentGroup
+metadata:
+  name: sample-app-group
+  namespace: new-model-demo
+  labels:
+    app.kubernetes.io/name: sample-app-group
+    app.kubernetes.io/instance: sample-app-group
+    app.kubernetes.io/part-of: integration-service
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: integration-service
+spec:
+  # Components are referenced by name and version
+  # allowing for multi-version and nested ComponentGroup support
+  components:
+    - name: frontend-service
+      kind: component
+      componentVersion:
+        name: "main"
+    - name: backend-service
+      kind: component
+      componentVersion:
+        name: "main"
+  # Test graph defines serialization order for integration tests
+  # Tests run in parallel by default; graph creates dependencies
+  testGraph:
+    # child-test-1 depends on both failing-test (failFast: true) and passing-test
+    # Will be cancelled if failing-test fails due to failFast: true
+    child-test-1:
+      - name: failing-test
+        failFast: true
+      - name: passing-test
+    # child-test-2 depends on failing-test with failFast: false
+    # Will run even if failing-test fails
+    child-test-2:
+      - name: failing-test
+        failFast: false
+    # child-test-3 depends on passing-test with failFast: true
+    child-test-3:
+      - name: passing-test
+        failFast: true
+    # independent-test is not listed - it has no parents or children
+    # failing-test and passing-test are root tests (no dependencies)
+status:
+  # Global Candidate List tracks the latest promoted versions of each component
+  # This enables reproducible testing and release workflows
+  globalCandidateList:
+    - name: frontend-service
+      version: main
+      url: https://github.com/demo-org/frontend-service
+      lastPromotedImage: quay.io/demo-org/frontend-service@sha256:1b29e3d6f5c2a8b4e9d7f1c3a5b8e2d4f6a9c1e3f5a7b9d1e3f5a7b9d1e3f
+      lastPromotedCommit: 6a7c81802e785aa869f82301afe61f4e9775772b
+      lastPromotedBuildTime: "2025-08-13T12:00:00Z"
+    - name: backend-service
+      version: main
+      url: https://github.com/demo-org/backend-service
+      lastPromotedImage: quay.io/demo-org/backend-service@sha256:ae32f1c5b7d9e2a4f6c8e1a3d5b7f9e2a4c6e8f1a3c5d7e9f1a3b5d7f9e1a3b5
+      lastPromotedCommit: 1359836353b8e249f2fbceba47d82751d7dab902
+      lastPromotedBuildTime: "2025-08-13T12:30:00Z"
+  conditions:
+    - type: Created
+      status: "True"
+      observedGeneration: 1
+      lastTransitionTime: "2025-08-13T10:15:00Z"
+      reason: ComponentGroupCreated
+      message: ComponentGroup created successfully
